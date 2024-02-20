@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+    .form {
+      position: absolute;
+      top: 40%;
+      left: 50%;
+      transform: translate(-40%, -40%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .form input {
+      /* margin-bottom: 10px; */
+      width: 300px;
+    }
+  
+    .form input[type="submit"] {
+      width: 100px;
+    }
+  </style>
+<form method="post" class="form">
+    {% csrf_token %}
+    <label for="email">Email:</label><br>
+    <input type="email" id="email" name="email" required class="form-control"><br>
+    <label for="password" >Password:</label><br>
+    <input type="password" id="password" name="password" required class="form-control" ><br>
+    <input type="submit" value="Login" class="btn btn-primary">
+</form>
+{% endblock %}

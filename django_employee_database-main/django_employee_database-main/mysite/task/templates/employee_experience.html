@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% block content %}
+<head><script src="https://code.jquery.com/jquery-3.6.0.min.js"></script></head>
+
+<h2>Employee Experience</h2>
+<p id="employee_id">Employee ID: {{ employee_id }}</p>
+<form method="post" id="employee_experience_form" style="background-color: aqua;">
+  {% csrf_token %}
+  <table class="table table-bordered" id="experience_table">
+    <thead>
+      <tr>
+        <th>Company Name</th>
+        <th>Role</th>
+        <th>Date of Joining</th>
+        <th>Last Date</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for experience in employee_experiences %}
+      <tr>
+        <td>{{ experience.company_name }}</td>
+        <td>{{ experience.role }}</td>
+        <td>{{ experience.date_of_joining }}</td>
+        <td>{{ experience.last_date }}</td>
+        <td>
+          <button type="button" class="btn btn-danger btn-sm delete_experience" data-id="{{ experience.employee_id }}">Delete</button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <button type="button" class="btn btn-primary" id="add_experience_row">Add Row</button>
+  <button type="submit" class="btn btn-success">Save</button>
+  <!-- <button type="button" class="btn btn-primary" id="logout_button">Show Employee_id</button> -->
+  <button type="button" class="btn btn-danger" id="logout_button">Logout</button>
+
+</form>
+
+<script>
+  var experience_counter = 0;
+  $(document).ready(function() {
+
+
+    $('#add_experience_row').on('click', function() {
+      experience_counter++;
+      var newRow = $('<tr>');
+      var cols = '';
+      cols += '<td><input type="text" name="company_name_' + experience_counter + '" required></td>';
+      cols += '<td><input type="text" name="role_' + experience_counter + '" required></td>';
+      cols += '<td><input type="date" name="date_of_joining_' + experience_counter + '" required></td>';
+      cols += '<td><input type="date" name="last_date_' + experience_counter + '" required></td>';
+      cols += '<td><button type="button" class="btn btn-danger btn-sm delete_experience">Delete</button></td>';
+      newRow.append(cols);
+      $('#experience_table').append(newRow);
+    });
+
+    $(document).on('click', '.delete_experience', function() {
+      $(this).closest('tr').remove();
+    });
+      // Display employee_id
+//   $('#employee_id').text('Employee ID: ' + '{{ employee_id }}');
+    $('#logout_button').on('click', function() {
+      $.ajax({
+        url: '{% url "logout" %}', // replace 'logout' with your logout view name
+        method: 'POST',
+        data: {
+          'csrfmiddlewaretoken': '{{ csrf_token }}'
+        },
+        success: function() {
+          window.location.href = '{% url "login" %}'; // replace 'login' with your login view name
+        }
+      });
+    });
+
+    $('#employee_experience_form').on('submit', function(e) {
+    e.preventDefault();
+
+    // Increment the experience_counter value before serializing the form data
+    $(this).append('<input type="hidden" name="experience_counter" value="' + experience_counter + '">');
+
+    var formData = $(this).serialize();
+    console.log(formData);
+    $.ajax({
+        url: '{% url "save_employee_experience" %}', // Make sure this URL matches your URL pattern in urls.py
+        method: 'POST',
+        data: formData,
+        success: function(response) {
+            alert(response.message);
+            // No need to handle experience_counter here, as it's already sent to the backend
+        },
+        error: function() {
+            alert('Error saving employee experience!');
+        }
+    });
+});
+  });
+
+
+</script>
+
+{% endblock %}
